@@ -33,21 +33,46 @@ open "ONVIF Camera Discovery.app"
 
 ### Windows
 
-```bash
-# Install Go 1.21+ from https://golang.org/dl/
-# Install gcc (MinGW-w64 recommended)
+⚠️ **IMPORTANT: Must build ON a Windows machine**
 
-# Clone the repository
+Cross-compilation from macOS/Linux does NOT work for Fyne GUI apps because:
+- Fyne requires CGO (C compiler)
+- Windows GUI libraries must be compiled on Windows
+- Platform-specific system calls are not compatible
+
+#### On a Windows Machine:
+
+```powershell
+# 1. Install Go 1.21+ from https://golang.org/dl/
+
+# 2. Install MinGW-w64 (for gcc)
+#    Download from: https://www.mingw-w64.org/
+#    Or use Chocolatey: choco install mingw
+
+# 3. Add MinGW to PATH (example):
+#    C:\mingw64\bin
+
+# 4. Clone the repository
 cd onvif-discover
 
-# Build (hides console window)
+# 5. Install dependencies
+go mod download
+
+# 6. Build (hides console window)
 go build -ldflags="-s -w -H=windowsgui" -o "ONVIF Camera Discovery.exe"
 
-# Run
-"ONVIF Camera Discovery.exe"
+# 7. Run
+.\ONVIF Camera Discovery.exe
 ```
 
-**Note:** Windows build must be done on Windows due to CGO requirements.
+#### Alternative: Use Docker (Advanced)
+```bash
+# Install fyne-cross
+go install github.com/fyne-io/fyne-cross@latest
+
+# Build for Windows using Docker
+fyne-cross windows -arch=amd64
+```
 
 ### Linux
 
