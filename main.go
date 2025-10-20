@@ -260,6 +260,7 @@ func extractServiceURL(response string) (string, error) {
 }
 
 func getStreamsFromService(ctx context.Context, serviceURL, username, password string) ([]StreamConfig, error) {
+	// Use the service URL directly - try it first
 	profiles, err := getMediaProfiles(ctx, serviceURL, username, password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get media profiles: %w", err)
@@ -321,8 +322,6 @@ func determineStreamName(profileName string, index int) string {
 }
 
 func getMediaProfiles(ctx context.Context, serviceURL, username, password string) ([]MediaProfile, error) {
-	mediaServiceURL := buildMediaServiceURL(serviceURL)
-
 	soapRequest := `<?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
 	<s:Body>
@@ -330,7 +329,7 @@ func getMediaProfiles(ctx context.Context, serviceURL, username, password string
 	</s:Body>
 </s:Envelope>`
 
-	resp, err := sendONVIFRequestWithAuth(ctx, mediaServiceURL, soapRequest, username, password)
+	resp, err := sendONVIFRequestWithAuth(ctx, serviceURL, soapRequest, username, password)
 	if err != nil {
 		return nil, err
 	}
@@ -344,8 +343,6 @@ func getMediaProfiles(ctx context.Context, serviceURL, username, password string
 }
 
 func getStreamURI(ctx context.Context, serviceURL, profileToken, username, password string) (string, error) {
-	mediaServiceURL := buildMediaServiceURL(serviceURL)
-
 	soapRequest := fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope">
 	<s:Body>
@@ -361,7 +358,7 @@ func getStreamURI(ctx context.Context, serviceURL, profileToken, username, passw
 	</s:Body>
 </s:Envelope>`, profileToken)
 
-	resp, err := sendONVIFRequestWithAuth(ctx, mediaServiceURL, soapRequest, username, password)
+	resp, err := sendONVIFRequestWithAuth(ctx, serviceURL, soapRequest, username, password)
 	if err != nil {
 		return "", err
 	}
@@ -372,14 +369,6 @@ func getStreamURI(ctx context.Context, serviceURL, profileToken, username, passw
 	}
 
 	return envelope.Body.GetStreamUriResponse.MediaUri.URI, nil
-}
-
-func buildMediaServiceURL(serviceURL string) string {
-	mediaServiceURL := strings.Replace(serviceURL, "/onvif/device_service", "/onvif/Media", -1)
-	if mediaServiceURL == serviceURL {
-		mediaServiceURL = strings.Replace(serviceURL, "/onvif/device", "/onvif/Media", -1)
-	}
-	return mediaServiceURL
 }
 
 func sendONVIFRequestWithAuth(ctx context.Context, serviceURL, soapBody, username, password string) ([]byte, error) {
