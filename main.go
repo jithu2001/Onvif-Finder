@@ -174,6 +174,12 @@ func main() {
 		printUsage()
 		os.Exit(0)
 
+	case "desktop", "app":
+		startDesktopApp()
+
+	case "gui":
+		startGUI()
+
 	case "ui":
 		port := "8080"
 		for i := 2; i < len(os.Args); i++ {
@@ -197,15 +203,19 @@ func main() {
 func printUsage() {
 	fmt.Printf("ONVIF Camera Discovery Tool v%s\n\n", Version)
 	fmt.Println("Usage:")
-	fmt.Println("  discover [--timeout seconds]             Discover cameras via WS-Discovery")
-	fmt.Println("  get-streams <url> <user> <pass>         Get streams from camera")
-	fmt.Println("  ui [--port port]                        Start web UI (default port: 8080)")
+	fmt.Println("  discover [--timeout seconds]             Discover cameras via WS-Discovery (CLI)")
+	fmt.Println("  get-streams <url> <user> <pass>         Get streams from camera (CLI)")
+	fmt.Println("  desktop                                  Start desktop app (auto-opens browser)")
+	fmt.Println("  gui                                      Start native GUI app (Fyne - macOS only)")
+	fmt.Println("  ui [--port port]                        Start web UI server (default port: 8080)")
 	fmt.Println("  version                                  Show version")
 	fmt.Println("  help                                     Show this help")
 	fmt.Println("\nExamples:")
 	fmt.Println("  onvif-discover discover --timeout 10")
 	fmt.Println("  onvif-discover get-streams http://192.168.1.150/onvif/device_service admin password")
-	fmt.Println("  onvif-discover ui --port 3000")
+	fmt.Println("  onvif-discover desktop           # Recommended for desktop use")
+	fmt.Println("  onvif-discover gui               # macOS native app")
+	fmt.Println("  onvif-discover ui --port 3000    # Web server only")
 	fmt.Println("\nEnvironment Variables:")
 	fmt.Println("  VERBOSE=1                               Enable verbose logging")
 	fmt.Println("  DEBUG=1                                 Enable debug mode")
