@@ -1,171 +1,125 @@
-# ONVIF Camera Discovery Tool
+# ONVIF Camera Discovery
 
-A production-ready cross-platform application for discovering ONVIF IP cameras and retrieving RTSP stream URLs.
+A native cross-platform desktop application for discovering ONVIF IP cameras and retrieving RTSP stream URLs.
 
-## Features
+**Pure native GUI - No web browser, no terminal window.**
 
-- 🔍 **WS-Discovery** - Automatic camera detection via multicast
-- 🔐 **ONVIF Authentication** - Secure WS-Security authentication
-- 📹 **Stream Details** - Resolution, FPS, bitrate, encoding info
-- 🖥️ **Multiple Interfaces** - CLI, Web UI, and Desktop app
-- 🌍 **Cross-Platform** - Windows, macOS, and Linux support
+## ✨ Features
 
-## Download & Installation
+- 🖥️ **Native Desktop App** - Pure GUI application (Fyne framework)
+- 🔍 **Auto Discovery** - WS-Discovery multicast protocol
+- 🔐 **Secure Authentication** - WS-Security with SHA1 digest
+- 📹 **Complete Stream Info** - Resolution, FPS, bitrate, encoding
+- 📋 **Copy to Clipboard** - One-click RTSP URL copying
+- 🎨 **Beautiful UI** - Modern native interface
+- 🌍 **Cross-Platform** - Windows, macOS, and Linux
 
-### Pre-built Binaries
+## 🚀 Quick Start
 
-**Windows:**
-```bash
-onvif-discover.exe desktop
+### macOS (Ready to Use!)
+
+Simply double-click:
+```
+ONVIF Camera Discovery.app
 ```
 
-**macOS:**
-```bash
-./onvif-discover-macos desktop
-# Or native GUI version:
-./onvif-discover-macos-gui gui
-```
+No installation needed! The app is already built and packaged.
 
-**Linux:**
-```bash
-./onvif-discover-linux desktop
-```
+### Windows & Linux
 
-## Usage
+See [BUILD.md](BUILD.md) for build instructions on your platform.
 
-### 1. Desktop App (Recommended)
+## 📸 Usage
 
-Automatically opens your browser with a beautiful UI:
+1. **Launch** the app (double-click on macOS)
+2. **Scan** - Set timeout and click "Scan for Cameras"
+3. **Authenticate** - Enter username/password for each camera
+4. **Get Streams** - Click "Get RTSP Streams"
+5. **Copy** - Click copy icon to copy RTSP URL to clipboard
 
-```bash
-# Windows
-onvif-discover.exe desktop
+## 🎯 How It Works
 
-# macOS/Linux
-./onvif-discover-macos desktop
-./onvif-discover-linux desktop
-```
-
-### 2. Native GUI (macOS only)
-
-Native desktop application using Fyne:
-
-```bash
-./onvif-discover-macos-gui gui
-```
-
-### 3. Web UI
-
-Start web server manually:
-
-```bash
-onvif-discover ui --port 8080
-# Then open http://localhost:8080
-```
-
-### 4. Command Line Interface
-
-**Discover cameras:**
-```bash
-onvif-discover discover --timeout 10
-```
-
-**Get streams from specific camera:**
-```bash
-onvif-discover get-streams http://192.168.1.150/onvif/device_service admin password123
-```
-
-## How It Works
-
-### Step 1: Discovery
-- Sends WS-Discovery multicast probe to `239.255.255.250:3702`
+### Discovery Phase
+- Sends WS-Discovery probe to multicast address `239.255.255.250:3702`
 - Cameras respond with their IP and ONVIF service URL
-- No credentials needed for discovery
+- No credentials required for discovery
+- Shows all cameras on the same subnet
 
-### Step 2: Authentication
-- Uses ONVIF service URL from discovery
-- Authenticates with WS-Security (SHA1 digest)
-- Retrieves media profiles and stream URIs
+### Stream Retrieval
+- Authenticates with WS-Security (SHA1 password digest)
+- Calls ONVIF `GetProfiles` to list media profiles
+- Calls ONVIF `GetStreamUri` for each profile
+- Parses and displays:
+  - Resolution (e.g., 1920x1080)
+  - Frame rate (e.g., 25 fps)
+  - Bitrate (e.g., 4096 kbps)
+  - Encoding (H264, H265, MJPEG)
+  - Clean RTSP URL (credentials removed)
 
-### Step 3: Stream Details
-- Resolution (width x height)
-- Frame rate (FPS)
-- Bitrate (kbps)
-- Encoding (H264, H265, etc.)
-- Clean RTSP URLs (credentials removed)
+## 📋 Requirements
 
-## Screenshots
+### For End Users
+- macOS 10.13+ (High Sierra or later)
+- Windows 7, 8, 10, 11 (64-bit)
+- Linux (most distributions with X11)
 
-### Desktop App
-![Desktop App](screenshot.png)
-
-The UI provides:
-- Camera scanning with configurable timeout
-- Camera cards showing IP and service URL
-- Credential input per camera
-- One-click RTSP stream retrieval
-- Copy-to-clipboard for RTSP URLs
-
-## Requirements
-
-- Cameras must be on the same subnet (WS-Discovery is link-local)
+### Network Requirements
+- Cameras must be on same subnet
 - Multicast must be enabled on cameras
-- Firewall must allow UDP traffic on port 3702
+- Firewall must allow UDP port 3702
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-**No cameras found:**
-1. Ensure cameras are on the same subnet
-2. Enable "Multicast Discovery" in camera settings
-3. Check firewall allows multicast (239.255.255.250:3702)
-4. Try increasing timeout to 15-30 seconds
+### No cameras found?
 
-**Authentication failed:**
-1. Verify username/password are correct
-2. Check camera supports ONVIF profile
-3. Enable ONVIF in camera settings
+1. **Check subnet** - Cameras must be on same network
+2. **Enable multicast** - In camera settings, enable "ONVIF" or "Multicast Discovery"
+3. **Firewall** - Allow UDP traffic on port 3702
+4. **Increase timeout** - Try 15-30 seconds for larger networks
 
-## Environment Variables
+### Authentication failed?
 
-```bash
-VERBOSE=1   # Enable verbose logging
-DEBUG=1     # Enable debug mode
-```
+1. **Verify credentials** - Double-check username/password
+2. **Check ONVIF support** - Camera must support ONVIF profile S or higher
+3. **Enable ONVIF** - Some cameras require ONVIF to be explicitly enabled
 
-## Building from Source
+### macOS: "App can't be opened"?
 
 ```bash
-# Clone repository
-git clone <repo-url>
-cd onvif-discover
-
-# Install dependencies
-go mod download
-
-# Build for your platform
-go build -o onvif-discover
-
-# Build for all platforms
-GOOS=windows GOARCH=amd64 go build -o onvif-discover.exe
-GOOS=linux GOARCH=amd64 go build -o onvif-discover-linux
-GOOS=darwin GOARCH=amd64 go build -o onvif-discover-macos
-
-# Build macOS native GUI
-go build -tags gui -o onvif-discover-macos-gui
+xattr -cr "ONVIF Camera Discovery.app"
 ```
 
-## Architecture
+## 🏗️ Technical Details
 
-- **Go** - Backend and CLI
-- **ONVIF/SOAP** - Camera communication
-- **WS-Discovery** - Camera detection protocol
-- **HTML/CSS/JS** - Web UI (embedded)
-- **Fyne** - Native GUI framework (optional)
+**Built with:**
+- Go 1.21+
+- Fyne v2.7.0 (native UI framework)
+- Pure Go ONVIF implementation
+- No external dependencies for end users
 
-## Version
+**Protocols:**
+- WS-Discovery (SOAP over UDP multicast)
+- ONVIF Device Management
+- ONVIF Media Service
+- WS-Security authentication
 
-v1.0.0
+**Binary Size:**
+- macOS: ~30 MB (includes all frameworks)
+- Windows: ~25-30 MB
+- Linux: ~30 MB
 
-## License
+## 📝 Version
+
+**v1.0.0** - Native GUI Release
+
+## 🔨 Building
+
+See [BUILD.md](BUILD.md) for detailed build instructions for each platform.
+
+## 📄 License
 
 MIT License
+
+---
+
+**Made with ❤️ for IP camera enthusiasts**
